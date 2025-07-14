@@ -1,22 +1,30 @@
 services:
   postgres:
-    build: .
-    container_name: openimis_postgresql
+    build:
+      context: .
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION:-16}
+        DB_NAME: ${DB_NAME:-openimis}
+        DB_USER: ${DB_USER:-openimis_user}
+        INIT_SCRIPT: ${INIT_SCRIPT:-fullDemoDatabase.sql}
+    container_name: ${CONTAINER_NAME:-openimis_postgresql}
     environment:
-      POSTGRES_DB: openimis
-      POSTGRES_USER: openimis_user
-      POSTGRES_PASSWORD: SuperSafePassword
-      # Add these for better initialization
+      POSTGRES_DB: ${DB_NAME:-openimis}
+      POSTGRES_USER: ${DB_USER:-openimis_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SuperSafePassword}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./fullDemoDatabase.sql:/fullDemoDatabase.sql:ro
+      - ./${INIT_SCRIPT:-fullDemoDatabase.sql}:/${INIT_SCRIPT:-fullDemoDatabase.sql}:ro
     restart: unless-stopped
-    # Add health check
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U openimis_user -d openimis"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-openimis_user} -d ${DB_NAME:-openimis}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
