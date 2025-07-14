@@ -1,21 +1,25 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:16
+    build: .
     container_name: openimis_postgresql
     environment:
       POSTGRES_DB: openimis
       POSTGRES_USER: openimis_user
       POSTGRES_PASSWORD: SuperSafePassword
+      # Add these for better initialization
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./fullDemoDatabase.sql:/fullDemoDatabase.sql:ro
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
     restart: unless-stopped
+    # Add health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openimis_user -d openimis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
-
