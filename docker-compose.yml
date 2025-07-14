@@ -3,11 +3,11 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16
-    container_name: vigtra_postgres
+    container_name: openimis_postgresql
     environment:
-      POSTGRES_DB: vigtra
-      POSTGRES_USER: vigtra
-      POSTGRES_PASSWORD: vigtrapass
+      POSTGRES_DB: openimis
+      POSTGRES_USER: openimis_user
+      POSTGRES_PASSWORD: SuperSafePassword
     ports:
       - "5432:5432"
     volumes:
